@@ -21,7 +21,7 @@ Download CARLA from the official website: https://carla.org/
 
 ```
 # Clone the code to local machine
-git clone https://github.com/i-Qin/HOCD
+git clone https://github.com/i-Qin/HOCD.git
 cd HOCD
 
 # Create Conda environment
