@@ -1,0 +1,86 @@
+simulator:
+  host: 'localhost'
+  port: 2000
+  timeout: 20
+  town: 'Town04'
+  synchronous: True                 # Whether to use synchronous mode
+  fixed_time: 0.01                  # Fixed time step in synchronous mode
+  no_rendering: False               # Disable rendering if True
+  user_defined_spawn_points: False
+  start_point: 308         
+  end_point: 56       
+  sampling_resolution: 2
+  
+
+controller:
+  max_throttle: 0.75
+  max_brake: 0.3
+  max_steer: 1
+  min_steer: -1
+  pre_ts: 0.2                       # Preview time
+  dt: 0.01                          # Discrete control time step
+
+  lateral: 
+    filter: False 
+    type: SharedControl            
+
+    SharedControl:            
+      driver_model: Preview         # Options: Preview / G29
+      vehicle_model: MPC
+
+    MPC:
+      Q: [ 250, 1, 50, 1 ]   
+      R: 1 
+      F: 1
+
+    Preview:
+      K_P: 1
+      K_I: 0
+      K_D: 0
+      near: 0
+      far: 2
+      delay: 5                     # Reaction delaycorresponds to different driver states. Options: 1(concentrated) / 5(normal) / 10(fatigued)
+
+  longitudinal:
+    type: PID
+    PID:
+      K_P: 2
+      K_I: 0
+      K_D: 0
+
+
+planner:
+  random: False                     # randomly select a path for training
+  ds: 1                             # Distance between sampled points in global path (meters)
+  TARGET_SPEED: 30.0                # Target speed [km/h]
+
+
+rl:
+  device: 'cuda:0'
+  train: True
+  use_state_norm: False
+
+  buffer_capacity: 100000
+  batch_size: 128
+  state_dim: 6
+  action_dim: 1
+  hidden_dim: 128
+  lr_a: 5e-4
+  lr_c: 5e-4
+
+  gamma: 0.9
+  gae_lambda: 0.95
+  clip_param: 0.2
+  entropy_coef: 0.01
+  ppo_epoch: 10
+
+  interval: 5
+  max_episode: 4000
+  max_episode_steps: 100000
+
+
+vehicles:
+  ego:
+    model: 'vehicle.tesla.model3'
+    color: '0,0,0'
+  obstacles: []

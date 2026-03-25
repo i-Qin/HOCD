@@ -1,0 +1,125 @@
+simulator:
+  host: 'localhost'
+  port: 2000
+  timeout: 20
+  town: 'Town04'
+  synchronous: True         # Whether to use synchronous mode
+  fixed_time: 0.01          # Fixed time step in synchronous mode
+  no_rendering: False       # Disable rendering if True
+  user_defined_spawn_points: True
+  start_point: 514         
+  end_point: 441        
+  sampling_resolution: 2
+  
+
+controller:
+  max_throttle: 0.75
+  max_brake: 0.3
+  max_steer: 1
+  min_steer: -1
+  pre_ts: 0.2               # Preview time
+  dt: 0.01                  # Discrete control time step
+
+  lateral:
+    filter: False      
+    type: SharedControl     # Options: MPC / Preview / G29 / SharedControl
+
+    SharedControl:         
+      driver_model: Preview # Options: Preview / G29
+      vehicle_model: MPC
+      authority_model: PPO  # Options: PPO / TVDC
+      driver_state: 0.5     # Options: Driver state 0.0 (concentrated) / 0.5 (normal) / 1.0 (fatigued)
+
+    MPC:
+      Q: [ 250, 1, 20, 1 ]   
+      R: 20
+      F: 1
+
+    Preview:
+      K_P: 1.6
+      K_I: 0
+      K_D: 0
+      near: 0
+      far: 2
+      delay: 5             # Reaction delaycorresponds to different driver states. Options: 1(concentrated) / 5(normal) / 10(fatigued)
+      
+    G29: {}
+
+  longitudinal:
+    type: PID
+    PID:
+      K_P: 2
+      K_I: 0
+      K_D: 0
+
+
+planner:
+  debug: True
+  ds: 1                     # Distance between sampled points in global path (meters)
+
+  MAX_SPEED: 60.0           # Maximum speed [km/h]
+  MAX_ACCEL: 2.0            # Maximum acceleration [m/s^2]
+  MAX_CURVATURE: 1.0        # Maximum curvature [1/m]
+  MAX_ROAD_WIDTH: 7.0       # Maximum lateral offset [m]
+  D_ROAD_W: 1.0             # Lateral sampling resolution [m]
+  DT: 0.2                   # Time tick [s]
+  MAX_T: 5.0                # Maximum prediction time [s]
+  MIN_T: 4.0                # Minimum prediction time [s]
+  TARGET_SPEED: 60.0        # Target speed [km/h]
+  D_T_S: 5.0                # Target speed sampling interval [km/h]
+  N_S_SAMPLE: 1             # Number of speed samples
+  ROBOT_RADIUS: 3.0         # Collision radius [m]
+
+  K_J: 0.1
+  K_T: 0.1
+  K_D: 1
+  K_LAT: 1.0
+  K_LON: 1.0
+
+
+rl:
+  device: 'cuda:0'
+  train: False
+  use_state_norm: False
+
+  buffer_capacity: 100000
+  batch_size: 128
+  state_dim: 6
+  action_dim: 1
+  hidden_dim: 128
+  lr_a: 5e-4
+  lr_c: 5e-4
+
+  gamma: 0.9
+  gae_lambda: 0.95
+  clip_param: 0.2
+  entropy_coef: 0.01
+  ppo_epoch: 10
+
+  model:
+    actor: 'rl/model/ppo/actor_model.pkl'
+    critic: 'rl/model/ppo/critic_model.pkl'
+
+
+vehicles:
+  ego: 
+    model: 'vehicle.tesla.model3'
+    color: '0,0,0'
+
+  obstacles:
+    - spawn_point: 1648
+      model: "vehicle.tesla.model3"
+      color: "255,88,0"
+      is_move: True
+      speed: 30             # [km/h]
+
+    # Example of custom obstacle
+    # spawn_point: 1648
+    # model: 'vehicle.tesla.model3'
+    # color: '255,88,0'
+    # is_move: True
+    # speed: 30
+    # user_defined : True
+    # location: [26.357386, 6.189795, 11.50]
+    # rotation: [0.0, -179.767349, 0.0]
+
